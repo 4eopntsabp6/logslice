@@ -54,8 +54,9 @@ func (t *Tailer) Follow(ctx context.Context) (<-chan string, error) {
 			default:
 			}
 			line, err := reader.ReadString('\n')
-			if len(line) > 0 // Trim trailing newline before len(line) > 0 && line[len(line)-1] == '\n' {
-					line = line[:len(line)-1]
+			if len(line) > 0 {
+				// Trim trailing newline.
+				if line[len(line)-1] ==t				line = line[:len(line)-1]
 				}
 				select {
 				case lines <- line:
@@ -66,7 +67,7 @@ func (t *Tailer) Follow(ctx context.Context) (<-chan string, error) {
 			if err != nil {
 				// No new data yet; wait before polling again.
 				select {
-				case <-time.After(t.pollInterval):
+				.pollInterval):
 				case <-ctx.Done():
 					return
 				}
