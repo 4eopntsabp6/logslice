@@ -2,13 +2,13 @@ package config
 
 import "fmt"
 
-// TruncateConfig holds configuration for line truncation.
+// TruncateConfig controls line truncation behaviour.
 type TruncateConfig struct {
-	Mode  string `mapstructure:"truncate-mode"`
-	Limit int    `mapstructure:"truncate-limit"`
+	Mode  string // none | chars | words | bytes
+	Limit int
 }
 
-// DefaultTruncateConfig returns a TruncateConfig with safe defaults.
+// DefaultTruncateConfig returns a TruncateConfig with truncation disabled.
 func DefaultTruncateConfig() TruncateConfig {
 	return TruncateConfig{
 		Mode:  "none",
@@ -16,22 +16,25 @@ func DefaultTruncateConfig() TruncateConfig {
 	}
 }
 
-// Validate checks that the truncate configuration is coherent.
-func (t TruncateConfig) Validate() error {
-	switch t.Mode {
-	case "none":
-		return nil
-	case "chars", "bytes":
-		if t.Limit <= 0 {
-			return fmt.Errorf("truncate limit must be > 0 when mode is %q", t.Mode)
-		}
-		return nil
-	default:
-		return fmt.Errorf("invalid truncate mode %q: must be none, chars, or bytes", t.Mode)
+var validTruncateModes = map[string]bool{
+	"none":  true,
+	"chars": true,
+	"words": true,
+	"bytes": true,
+}
+
+// Validate returns an error if the TruncateConfig is misconfigured.
+func (c TruncateConfig) Validate() error {
+	if !validTruncateModes[c.Mode] {
+		return fmt.Errorf("truncate: invalid mode %q (valid: none, chars, words, bytes)", c.Mode)
 	}
+	if c.Mode != "none" && c.Limit <= 0 {
+		return fmt.Errorf("truncate: limit must be > 0 when mode is %q", c.Mode)
+	}
+	return nil
 }
 
 // Enabled reports whether truncation is active.
-func (t TruncateConfig) Enabled() bool {
-	return t.Mode != "none"
+func (c TruncateConfig) Enabled() bool {
+	return c.Mode != "none"
 }
