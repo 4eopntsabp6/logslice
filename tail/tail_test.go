@@ -92,3 +92,34 @@ func TestFollow_CancelStopsChannel(t *testing.T) {
 		t.Fatal("channel was not closed after context cancel")
 	}
 }
+
+func TestFollow_EmitsMultipleLines(t *testing.T) {
+	f := writeTempTailFile(t, "")
+	defer f.Close()
+
+	tr := tail.New(f.Name(), 20*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+
+	lines, err := tr.Follow(ctx)
+	if err != nil {
+		t.Fatalf("Follow: %v", err)
+	}
+
+	time.Sleep(30 * time.Millisecond)
+	if _, err := f.WriteString("line one\nline two\n"); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+
+	want := []string{"line one", "line two"}
+	for _, w := range want {
+		select {
+		case got := <-lines:
+			if got != w {
+				t.Errorf("got %q, want %q", got, w)
+			}
+		case <-time.After(1 * time.Second):
+			t.Fatalf("timed out waiting for line %q", w)
+		}
+	}
+}
