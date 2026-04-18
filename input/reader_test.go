@@ -72,6 +72,32 @@ func TestNewFileReader_Empty(t *testing.T) {
 	}
 }
 
+// TestNewFileReader_NoTrailingNewline verifies that a file whose last line
+// lacks a trailing newline is still read correctly.
+func TestNewFileReader_NoTrailingNewline(t *testing.T) {
+	path := writeTempFile(t, "alpha\nbeta\ngamma")
+	r, err := input.NewFileReader(path)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	defer r.Close()
+
+	expected := []string{"alpha", "beta", "gamma"}
+	for i, want := range expected {
+		got, ok := r.ReadLine()
+		if !ok {
+			t.Fatalf("line %d: expected more lines", i+1)
+		}
+		if got != want {
+			t.Errorf("line %d: got %q, want %q", i+1, got, want)
+		}
+	}
+	_, ok := r.ReadLine()
+	if ok {
+		t.Error("expected no more lines after last line without newline")
+	}
+}
+
 func TestNewStdinReader_NotNil(t *testing.T) {
 	r := input.NewStdinReader()
 	if r == nil {
