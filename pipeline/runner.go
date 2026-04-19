@@ -18,6 +18,9 @@ type Runner struct {
 
 // NewRunner constructs a Runner from the given config, writing output to w.
 func NewRunner(cfg *config.Config, w io.Writer) (*Runner, error) {
+	if cfg == nil {
+		return nil, fmt.Errorf("config must not be nil")
+	}
 	p, err := New(cfg)
 	if err != nil {
 		return nil, fmt.Errorf("pipeline init: %w", err)
@@ -31,6 +34,10 @@ func NewRunner(cfg *config.Config, w io.Writer) (*Runner, error) {
 
 // Run executes the pipeline: slices input, writes results, and reports stats.
 func (r *Runner) Run(out io.Writer) error {
+	if out == nil {
+		return fmt.Errorf("output writer must not be nil")
+	}
+
 	results, st, err := r.pipeline.Execute()
 	if err != nil {
 		return fmt.Errorf("pipeline execute: %w", err)
