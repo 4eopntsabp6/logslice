@@ -23,6 +23,14 @@ func writeTempTailFile(t *testing.T, initial string) *os.File {
 	return f
 }
 
+// appendLine writes a newline-terminated string to f, failing the test on error.
+func appendLine(t *testing.T, f *os.File, line string) {
+	t.Helper()
+	if _, err := f.WriteString(line + "\n"); err != nil {
+		t.Fatalf("appendLine: %v", err)
+	}
+}
+
 func TestNew_DefaultPollInterval(t *testing.T) {
 	tr := tail.New("/tmp/x.log", 0)
 	if tr == nil {
@@ -55,9 +63,7 @@ func TestFollow_EmitsNewLines(t *testing.T) {
 
 	// Append a line after Follow has started.
 	time.Sleep(30 * time.Millisecond)
-	if _, err := f.WriteString("hello tail\n"); err != nil {
-		t.Fatalf("write: %v", err)
-	}
+	appendLine(t, f, "hello tail")
 
 	select {
 	case got := <-lines:
@@ -107,9 +113,8 @@ func TestFollow_EmitsMultipleLines(t *testing.T) {
 	}
 
 	time.Sleep(30 * time.Millisecond)
-	if _, err := f.WriteString("line one\nline two\n"); err != nil {
-		t.Fatalf("write: %v", err)
-	}
+	appendLine(t, f, "line one")
+	appendLine(t, f, "line two")
 
 	want := []string{"line one", "line two"}
 	for _, w := range want {
