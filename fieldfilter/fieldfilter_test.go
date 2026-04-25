@@ -85,3 +85,21 @@ func TestMatch_Regex(t *testing.T) {
 		t.Error("expected no match for info")
 	}
 }
+
+func TestMatch_EmptyLine(t *testing.T) {
+	modes := []struct {
+		mode  Mode
+		key   string
+		value string
+	}{
+		{ModeExact, "level", "error"},
+		{ModePrefix, "level", "err"},
+		{ModeRegex, "level", "^error$"},
+	}
+	for _, m := range modes {
+		f, _ := New(m.mode, m.key, m.value)
+		if f.Match("") {
+			t.Errorf("expected no match for empty line with mode %v", m.mode)
+		}
+	}
+}
