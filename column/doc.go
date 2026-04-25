@@ -9,9 +9,15 @@
 //	none    – pass-through, no extraction performed
 //	extract – split by delimiter and return column at index
 //
+// If the line has fewer fields than expected, Apply returns an empty
+// string rather than panicking.
+//
 // Example usage:
 //
 //	e, err := column.New(column.ModeExtract, ",", 2)
 //	if err != nil { ... }
 //	result := e.Apply(line)
+//
+// Delimiter can be any non-empty string, including multi-character
+// sequences such as "\t\t" or " | ".
 package column
