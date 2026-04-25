@@ -34,3 +34,11 @@ func (f FieldConfig) Validate() error {
 func (f FieldConfig) Enabled() bool {
 	return f.Mode != "none"
 }
+
+// String returns a human-readable summary of the FieldConfig.
+func (f FieldConfig) String() string {
+	if !f.Enabled() {
+		return "field extraction disabled"
+	}
+	return fmt.Sprintf("field extraction enabled (mode=%s, key=%s)", f.Mode, f.Key)
+}
