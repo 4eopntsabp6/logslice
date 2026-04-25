@@ -17,4 +17,11 @@
 //
 // The Reporter supports both tabular (Report) and inline (ReportInline) output
 // formats, suitable for verbose mode or piped output respectively.
+//
+// Zero values and thread safety:
+//
+// Stats objects are not safe for concurrent use. Callers that need to record
+// statistics from multiple goroutines should use external synchronization or
+// maintain per-goroutine Stats instances and merge them after all goroutines
+// complete.
 package stats
