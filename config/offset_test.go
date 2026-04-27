@@ -45,6 +45,15 @@ func TestOffsetValidate_ZeroN(t *testing.T) {
 	}
 }
 
+func TestOffsetValidate_NegativeN(t *testing.T) {
+	for _, mode := range []string{"skip", "start"} {
+		c := OffsetConfig{Mode: mode, N: -1}
+		if err := c.Validate(); err == nil {
+			t.Errorf("expected error for mode=%q with N=-1", mode)
+		}
+	}
+}
+
 func TestOffsetEnabled_None(t *testing.T) {
 	c := OffsetConfig{Mode: "none", N: 0}
 	if c.Enabled() {
